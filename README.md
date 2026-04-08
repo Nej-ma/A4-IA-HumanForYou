@@ -1,4 +1,4 @@
-# IA for HumanForYou — Analyse de l'attrition des employés
+# IA for HumanForYou : Analyse de l'attrition des employés
 
 Projet de data science réalisé dans le cadre du cursus CESI.  
 L'entreprise pharmaceutique indienne **HumanForYou** (~4 000 employés) connaît un taux de rotation annuel de ~15 %.  
