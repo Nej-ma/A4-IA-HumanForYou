@@ -70,11 +70,13 @@ Les 261 colonnes de timestamps ont été condensées en 5 indicateurs. Le plus d
 3. Fusion des 5 sources sur EmployeeID - 4410 lignes, 0 doublon
 4. Imputation des NA par la médiane (< 1% de NA, biais vérifié)
 5. Encodage : LabelEncoder (Gender) + One-Hot (5 variables nominales)
-6. Normalisation StandardScaler - **uniquement sur X_train** pour éviter la fuite de données
+6. Normalisation StandardScaler - **uniquement sur X_train** (bonne pratique anti data leakage)
 
-Ce dernier point est important : si on fit le scaler sur tout le dataset avant le split, on introduit une fuite de données qui fausse les métriques. On a corrigé ça explicitement.
+**Data leakage** : si on fit le scaler sur tout le dataset avant le split, la moyenne et l'ecart-type sont calcules a partir des donnees de test - le modele "voit" indirectement ces donnees pendant l'entrainement, ce qui fausse les metriques. On sauvegarde donc `dataset_encoded.csv` sans normalisation, et le scaler est fit sur `X_train` uniquement en notebook 03.
 
-**Visuel** : pipeline en 6 étapes avec icônes
+L'imputation est faite sur le dataset complet, mais on a verifie que les medianes sont identiques sur le dataset complet et sur X_train seul (EnvironmentSatisfaction, JobSatisfaction, WorkLifeBalance : difference = 0.0000). Aucun biais.
+
+**Visuel** : pipeline en 6 etapes avec icones
 
 **Notebook** : NB02
 
@@ -275,7 +277,7 @@ Le modèle est prêt à être déployé avec les précautions identifiées.
 SMOTE génère des données synthétiques qui peuvent ne pas refléter la réalité des profils RH. `class_weight='balanced'` est plus conservateur et suffisant pour un déséquilibre modéré 84/16.
 
 **"L'AUC de 0.997 c'est pas suspect ?"**
-Si, et on le dit explicitement dans les limites. C'est principalement dû à `days_over_8h` qui est un signal extrêmement fort mais calculé sur l'année complète. En production sans ce signal en temps réel, les performances seraient plus modestes.
+C'est un score exceptionnel explique principalement par `days_over_8h` (+96% chez les partants), un signal tres fort issu du badgeage. On le mentionne explicitement dans les limites : ce signal est calcule sur l'annee complete et n'est pas disponible en temps reel en production. Sans lui, les performances seraient plus modestes.
 
 **"Comment vous gérez le biais sur le genre ou l'âge ?"**
 Les variables Gender et MaritalStatus sont dans le modèle mais leur importance est faible. Les recommandations finales ne s'appuient pas sur ces variables. Un audit de fairness par sous-groupe (par département, niveau) serait la prochaine étape.
